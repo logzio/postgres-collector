@@ -79,7 +79,7 @@ logzio/postgres-rds-collector
 | SCRAPE_TIMEOUT | The time to wait before throttling a scrape request to cloudwatch exporter, Default = `120`|
 | REMOTE_TIMEOUT | the time to wait before throttling remote write post request to logz.io, Default = `120`|
 | LOG_LEVEL | Opentelemetry log level, Default = `debug` |
-| LOGZIO_LOG_LEVEL | `builder.py` Python script log level. Default = `info` |
+| LOGZIO_LOG_LEVEL | `builder.py` Python script log level. Default = `debug` |
 | SET_TIMESTAMP | Boolean for whether to set the Prometheus metric timestamp as the original Cloudwatch timestamp. Default = `false` |
 | PERIOD_SECONDS | period to request the metric for. Only the most recent data point is used. Default = `300` |
 | RANGE_SECONDS | how far back to request data for. Useful for cases such as Billing metrics that are only set every few hours. Default = `300` |
@@ -99,7 +99,6 @@ logzio/postgres-rds-collector
 | FLUSH_INTERVAL | Interval, in seconds, to wait before invoking the next buffer flush. Default=`5s` |
 | RETRY_MAX_INTERVAL | Maximum interval, in seconds, to wait between retries. Default=`30s` |
 | FLUSH_THREAD_COUNT | Number of threads to flush the buffer. Default=`2` |
-| LOG_LEVEL | The log level for this container. Default=`info` |
 
 ### Run with configuration file
 Create `config.yml` file:
