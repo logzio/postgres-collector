@@ -1,0 +1,43 @@
+receivers:
+  prometheus_exec:
+    exec: java -jar cloudwatch_exporter-0.11.0-jar-with-dependencies.jar {{port}} config_files/cloudwatch.yml
+    scrape_interval: 60s
+    port: 9106
+    env: []
+  prometheus_exec/postgres:
+    exec: ./postgres_exporter
+    scrape_interval: 60s
+    port: 9187
+    env:
+      - name: DATA_SOURCE_NAME
+        value: "postgresql://postgres:yooms153@database-1.cluster-c8jcriwxr4jg.us-east-1.rds.amazonaws.com:5432"
+      - name: PG_EXPORTER_EXTEND_QUERY_PATH
+        value: "config_files/queries.yml"
+
+processors:
+
+exporters:
+  logging:
+    loglevel: "info"
+  prometheusremotewrite:
+    timeout: 300s
+    endpoint: https://listener.logz.io:8053
+    external_labels:
+      p8s_logzio_name: cloudwatch-metrics
+    headers:
+      Authorization: "Bearer "
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check,pprof,zpages]
+  pipelines:
+    metrics:
+      receivers: [prometheus_exec,prometheus_exec/postgres]
+      processors: []
+      exporters: [logging,prometheusremotewrite]
+  telemetry:
+    logs:
+      level: info

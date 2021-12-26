@@ -1,0 +1,56 @@
+exporters:
+  logging:
+    loglevel: info
+  prometheusremotewrite:
+    endpoint: https://listener.logz.io:8053
+    external_labels:
+      p8s_logzio_name:
+    headers:
+      Authorization: Bearer
+    timeout: 120s
+extensions:
+  health_check: null
+  pprof: null
+  zpages: null
+processors: null
+receivers:
+  prometheus_exec:
+    env: []
+    exec: java -jar cloudwatch_exporter-0.11.0-jar-with-dependencies.jar 9106 config_files/cloudwatch.yml
+    port: 9106
+    scrape_interval: 300s
+    scrape_timeout: 120s
+  prometheus_exec/postgres:
+    exec: ./postgres_exporter
+    scrape_interval: 60s
+    port: 9187
+    env:
+      - name: DATA_SOURCE_NAME
+        value:
+      - name: PG_EXPORTER_EXTEND_QUERY_MR_PATH
+        value: "queries/"
+      - name: PG_EXPORTER_EXTEND_QUERY_MR
+        value: "true"
+  prometheus_exec/fluentd:
+    exec: fluentd -c /config_files/fluent.conf
+    scrape_interval: 60s
+    port: 5001
+
+service:
+  extensions:
+  - health_check
+  - pprof
+  - zpages
+  pipelines:
+    metrics:
+      exporters:
+      - logging
+      - prometheusremotewrite
+      processors: []
+      receivers:
+      - prometheus_exec
+      - prometheus_exec/postgres
+      - prometheus_exec/fluentd
+  telemetry:
+    logs:
+      level: debug
