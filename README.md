@@ -65,7 +65,7 @@ logzio/postgres-rds-collector
 | LOGZIO_REGION (Required)| Your Logz.io region code. For example if your region is US, then your region code is `us`. You can find your region code here: https://docs.logz.io/user-guide/accounts/account-region.html#regions-and-urls. |
 | TOKEN (Required)| Token for shipping metrics to your Logz.io account. Find it under Settings > Manage accounts. [_How do I look up my Metrics account token?_](/user-guide/accounts/finding-your-metrics-account-token/) |
 | LOGZIO_LOG_TOKEN (Required) | . Your Logz.io logs account token. Replace `LOGZIO_LOG_TOKEN` with the [token](https://app.logz.io/#/dashboard/settings/general) of the logs account you want to ship to. |
-| RDS_INSTANCES (Required) | Comma-separated list of namespaces of the metrics you want to collect. You can find a complete list of namespaces at [_AWS Services That Publish CloudWatch Metrics_](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html).   **Note:** This Environment variable is required unless you define the `CUSTOM_CONFIG` Environment variable |
+| RDS_INSTANCES (Required) | Comma seperated list of rds instances (DBInstanceIdentifier) to collect cloudwatch metrics from. |
 | PG_HOST (Required) | the host address of your postgresql database (ex: database.rds.amazonaws.com) |
 | PG_PASSWORD (Required)| postgresql database password. |
 | PG_USER | postgresql database username . Default = `postgres` |
@@ -132,7 +132,7 @@ cloudwatch:
   region: "us-east-1"
   # role arn to assume
   role_arn: ""
-  # list of rds instances to monitor
+  # list of rds instances (DBInstanceIdentifier) to collect cloudwatch metrics from.
   rds_instances: ["instance-1","instance-2"]
   # The newest data to request. Used to avoid collecting data that has not fully converged
   delay_seconds: 300
