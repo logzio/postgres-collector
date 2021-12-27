@@ -38,54 +38,11 @@ class Builder:
         moduleFile.truncate()
         moduleFile.close()
 
-    # Takes user input and applies it to cloudwatch exporter
-    def updateCloudwatchConfiguration(self, pathToNameSpaces='./cw_namespaces/') -> None:
-        self.logger.info('Adding cloudwatch exporter configuration')
-        with open(self.cloudwatchConfigPath, 'r+') as cloudwatchFile:
-            values = yaml.safe_load(cloudwatchFile)
-            # Add global settings
-            values["period_seconds"] = self.config.cloudwatch['period_seconds']
-            values["range_seconds"] = self.config.cloudwatch['range_seconds']
-            values["delay_seconds"] = self.config.cloudwatch['delay_seconds']
-            values["region"] = self.config.cloudwatch['region']
-            if self.config.cloudwatch['role_arn'] != '':
-                values["role_arn"] = self.config.cloudwatch['role_arn']
-            # Add metrics
-            with open('{}{}.yml'.format(pathToNameSpaces, 'RDS'), 'r+') as namespaceFile:
-                namespaceYaml = yaml.safe_load(namespaceFile)
-                for query in namespaceYaml:
-                    for instance in self.config.cloudwatch['rds_instances']:
-                        query['aws_dimension_select']['DBInstanceIdentifier'].append(instance)
-                if namespaceYaml not in values['metrics']:
-                    values['metrics'].extend(namespaceYaml)
-
-                self.logger.info(f'AWS/RDS was added to cloudwatch exporter configuration')
-            self.dumpAndCloseFile(values, cloudwatchFile)
-        self.logger.info('Cloudwatch exporter configuration ready')
-        self.logger.debug(f'Cloudwatch exporter configuration:\n{yaml.dump(values)}')
-
     # Takes user input and applies it to open telemetry collector
     def updateOtelConfiguration(self) -> None:
         self.logger.info('Adding opentelemtry collector configuration')
         with open(self.otelConfigPath, 'r+') as otelFile:
             values = yaml.safe_load(otelFile)
-            # Update receiver
-            values['receivers']['prometheus_exec']['scrape_interval'] = f"{self.config.otel['scrape_interval']}s"
-            values['receivers']['prometheus_exec']['scrape_timeout'] = f"{self.config.otel['scrape_timeout']}s"
-            values['receivers']['prometheus_exec']['env'] = []
-            if self.config.otel['AWS_ACCESS_KEY_ID'] != "" and self.config.otel['AWS_SECRET_ACCESS_KEY'] != "":
-                values['receivers']['prometheus_exec']['env'].append(
-                    {
-                        "name": "AWS_ACCESS_KEY_ID",
-                        "value": self.config.otel['AWS_ACCESS_KEY_ID']
-                    }
-                )
-                values['receivers']['prometheus_exec']['env'].append(
-                    {
-                        "name": "AWS_SECRET_ACCESS_KEY",
-                        "value": self.config.otel['AWS_SECRET_ACCESS_KEY']
-                    }
-                )
             # update pg
             values['receivers']['prometheus_exec/postgres']['scrape_interval'] = f"{self.config.pg['pg_scrape_interval']}s"
             values['receivers']['prometheus_exec/postgres']['scrape_timeout'] = f"{self.config.pg['pg_scrape_timeout']}s"
@@ -114,13 +71,6 @@ class Builder:
 
 if __name__ == '__main__':
     builder = Builder('./config_files/config.yml')
-    builder.config.cloudwatch['rds_instances'] = builder.config.validate()
-    if builder.config.cloudwatch["custom_config"] == "false":
-        builder.updateCloudwatchConfiguration()
-    else:
-        builder.logger.info('Adding custom cloudwatch exporter configuration')
-        with open(builder.cloudwatchConfigPath, 'r+') as cloudwatchFile:
-            builder.logger.debug(f'Cloudwatch exporter configuration:\n{yaml.dump(yaml.safe_load(cloudwatchFile))}')
     builder.updateOtelConfiguration()
     time.sleep(2.0)
     os.system('/otelcontribcol_linux_amd64 --config ./config_files/otel-config.yml')

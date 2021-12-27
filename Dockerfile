@@ -32,13 +32,6 @@ COPY config_files/fluent.conf /fluentd/etc/
 RUN mkdir /var/run/fluentd
 RUN touch /var/run/fluentd/sql_state
 
-# Install JAVA
-RUN apt-get update && \
-apt-get install -y --no-install-recommends \
-        openjdk-11-jre
-
-# Prints installed java version, just for checking
-RUN java --version
 # Copy files
 COPY config_files config_files
 COPY queries queries
@@ -47,7 +40,6 @@ COPY testdata testdata
 COPY builder.py builder.py
 COPY config.py config.py
 COPY input_validator.py input_validator.py
-COPY cloudwatch_exporter-0.11.0-jar-with-dependencies.jar cloudwatch_exporter-0.11.0-jar-with-dependencies.jar
 
 # Download opentelemetry binary
 COPY otelcontribcol_linux_amd64 otelcontribcol_linux_amd64
@@ -64,5 +56,8 @@ EXPOSE 13133
 EXPOSE 1777
 
 EXPOSE 5001
+
+EXPOSE 9187
+
 
 CMD ["python3", "builder.py"]

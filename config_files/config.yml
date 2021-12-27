@@ -18,25 +18,6 @@ otel:
   # python script log level
   logzio_log_level: "debug"
   # aws credentials
-  AWS_ACCESS_KEY_ID: ""
-  AWS_SECRET_ACCESS_KEY: ""
-cloudwatch:
-  # set to true if you are loading a custom configuration file for cloudwatch exporter
-  custom_config: "false"
-  # your cloudwatch aws region
-  region: "us-east-1"
-  # role arn to assume
-  role_arn: ""
-
-  rds_instances: ["a","b"]
-  # The newest data to request. Used to avoid collecting data that has not fully converged
-  delay_seconds: 300
-  # how far back to request data for. Useful for cases such as Billing metrics that are only set every few hours
-  range_seconds: 300
-  # period to request the metric for. Only the most recent data point is used
-  period_seconds: 300
-  # boolean for whether to set the Prometheus metric timestamp as the original Cloudwatch timestamp
-  set_timestamp: "false"
 pg:
   # pg database host
   pg_host:
