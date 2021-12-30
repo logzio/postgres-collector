@@ -1,3 +1,6 @@
+# This project is in Beta stage
+
+
 # Postgres rds collector
 Collects rds host metrics from cloudwatch, database metrics using postgres exporter, query logs using fluentd and forward the data to logz.io, based on opentelemetry collector
 
