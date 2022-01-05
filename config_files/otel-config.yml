@@ -19,14 +19,12 @@ receivers:
     scrape_interval: 60s
     port: 9187
     env:
+      - name: PG_EXPORTER_DISABLE_DEFAULT_METRICS
+        value: "true"
       - name: PG_EXPORTER_EXTEND_QUERY_MR_PATH
         value: "queries/"
       - name: PG_EXPORTER_EXTEND_QUERY_MR
         value: "true"
-  prometheus_exec/fluentd:
-    exec: fluentd -c /config_files/fluent.conf
-    scrape_interval: 60s
-    port: 5001
 
 service:
   extensions:
@@ -41,7 +39,6 @@ service:
       processors: []
       receivers:
       - prometheus_exec/postgres
-      - prometheus_exec/fluentd
   telemetry:
     logs:
       level: debug

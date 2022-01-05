@@ -72,17 +72,6 @@ logzio/mobileye-rds-collector
 | PG_DB | postgresql database name . Default = `postgres` |
 | PG_SCRAPE_INTERVAL | postgresql database scrape interval . Default = `60` |
 | PG_SCRAPE_TIMEOUT | postgresql database scrape timeout . Default = `60` |
-| LOGZIO_LOG_LISTENER | your region’s listener host . For more information on finding your account’s region, see Account region. Default= `https://listener.logz.io:8071`  |
-| LOGZIO_TYPE | The log type you'll use with this Docker. This is shown in your logs under the `type` field in Kibana. <br> Logz.io applies parsing based on `type`. Default=`postgres-observability` |
-| SLOW_FLUSH_LOG_THRESHOLD | The threshold for chunk flush performance check. Default=`20.0` |
-| BUFFER_TYPE | Specifies which plugin to use as the backend. Default=`file` |
-| BUFFER_PATH | Path of the buffer. Default=`/var/log/Fluentd-buffers/stackdriver.buffer` |
-| OVERFLOW_ACTION | Controls the behavior when the queue becomes full. Refer to [fluentd docs](https://docs.fluentd.org/output#overflow_action) for more details about your options. Default=`block` |
-| CHUNK_LIMIT_SIZE | Maximum size of a chunk allowed. Default=`2M`  |
-| QUEUE_LIMIT_LENGTH | Maximum length of the output queue. Default=`6`  |
-| FLUSH_INTERVAL | Interval, in seconds, to wait before invoking the next buffer flush. Default=`5s` |
-| RETRY_MAX_INTERVAL | Maximum interval, in seconds, to wait between retries. Default=`30s` |
-| FLUSH_THREAD_COUNT | Number of threads to flush the buffer. Default=`2` |
 
 ### Run with configuration file
 Create `config.yml` file:
@@ -117,34 +106,6 @@ pg:
   pg_scrape_interval: 60
   # pg scrape timeout
   pg_scrape_timeout: 60
-
-fluentd:
-  
-  logzio_log_listener: "https://listener.logz.io:8071"
-
-  logzio_log_token: ""
-
-  logzio_type: "postgres-observability"
-
-  buffer_type: "file"
-
-  buffer_path: "/var/log/fluentd-buffers/stackdriver.buffer"
-
-  overflow_action: "block"
-
-  chunk_limit_size: "2M"
-
-  queue_limit_length: "6"
-
-  flush_interval: "5s"
-
-  retry_max_interval: "30"
-
-  retry_forever: "true"
-
-  flush_thread_count: "2"
-
-  slow_flush_log_threshold: "20.0"
 ```
 Mount the configuration file to your container:
 ```shell

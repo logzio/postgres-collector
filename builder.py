@@ -4,7 +4,6 @@ import time
 
 from config import Config
 import yaml
-import subprocess
 
 
 class Builder:
@@ -46,12 +45,10 @@ class Builder:
             # update pg
             values['receivers']['prometheus_exec/postgres']['scrape_interval'] = f"{self.config.pg['pg_scrape_interval']}s"
             values['receivers']['prometheus_exec/postgres']['scrape_timeout'] = f"{self.config.pg['pg_scrape_timeout']}s"
-            values['receivers']['prometheus_exec/fluentd']['scrape_interval'] = f"{self.config.pg['pg_scrape_interval']}s"
-            values['receivers']['prometheus_exec/fluentd']['scrape_timeout'] = f"{self.config.pg['pg_scrape_timeout']}s"
             values['receivers']['prometheus_exec/postgres']['env'].append(
                 {
                     "name": "DATA_SOURCE_NAME",
-                    "value": f"postgresql://{os.environ['PG_USER']}:{os.environ['PG_PASSWORD']}@{os.environ['PG_HOST']}:{os.environ['PG_PORT']}"
+                    "value": f"postgresql://{os.environ['PG_USER']}:{os.environ['PG_PASSWORD']}@{os.environ['PG_HOST']}:{os.environ['PG_PORT']}/{os.environ['PG_DB']}"
                 }
             )
 

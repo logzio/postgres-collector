@@ -33,31 +33,6 @@ pg:
   pg_scrape_interval: 60
   # pg scrape timeout
   pg_scrape_timeout: 60
-fluentd:
-  logzio_log_listener: "https://listener.logz.io:8071"
 
-  logzio_log_token: ""
-
-  logzio_type: "postgres-observability"
-
-  buffer_type: "file"
-
-  buffer_path: "/var/log/fluentd-buffers/stackdriver.buffer"
-
-  overflow_action: "block"
-
-  chunk_limit_size: "2M"
-
-  queue_limit_length: "6"
-
-  flush_interval: "5s"
-
-  retry_max_interval: "30"
-
-  retry_forever: "true"
-
-  flush_thread_count: "2"
-
-  slow_flush_log_threshold: "20.0"
 
 

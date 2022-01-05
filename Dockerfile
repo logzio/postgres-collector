@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.14-debian-1
+FROM debian:stable-slim
 
 # Use root account to use apt
 USER root
@@ -8,29 +8,6 @@ RUN apt-get update -y && apt-get install python3 -y && apt-get install python3-p
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt --user && \
     rm -f requirements.txt
-
-# below RUN includes plugin as examples elasticsearch is not required
-# you may customize including plugins as you wish
-RUN buildDeps="sudo make gcc g++ libc-dev" \
- && apt-get clean \
- && apt-get install libpq-dev -y \
- && apt-get install -y --no-install-recommends $buildDeps \
- && sudo gem install fluent-plugin-logzio \
- && sudo gem install fluent-plugin-prometheus \
- && sudo gem install pg \
- && sudo gem install fluent-plugin-sql \
- && sudo gem install fluent-plugin-record-modifier \
- && sudo gem sources --clear-all \
- && SUDO_FORCE_REMOVE=yes \
-    apt-get purge -y --auto-remove \
-                  -o APT::AutoRemove::RecommendsImportant=false \
-                  $buildDeps \
- && rm -rf /var/lib/apt/lists/* \
- && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
-
-COPY config_files/fluent.conf /fluentd/etc/
-RUN mkdir /var/run/fluentd
-RUN touch /var/run/fluentd/sql_state
 
 # Copy files
 COPY config_files config_files
