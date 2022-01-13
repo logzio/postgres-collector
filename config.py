@@ -25,19 +25,6 @@ class Config:
             self.otel['log_level'] = environ.get('LOG_LEVEL')
         if environ.get('LOGZIO_LOG_LEVEL') is not None:
             self.otel['logzio_log_level'] = environ.get('LOGZIO_LOG_LEVEL')
-        # pg
-        self.validatePg()
-        if environ.get('PG_HOST') is None:
-            environ['PG_HOST'] = self.pg['pg_host']
-        if environ.get('PG_PORT') is None:
-            environ['PG_PORT'] = str(self.pg['pg_port'])
-        if environ.get('PG_USER') is None:
-            environ['PG_USER'] = self.pg['pg_user']
-        if environ.get('PG_PASSWORD') is None:
-            environ['PG_PASSWORD'] = self.pg['pg_password']
-        if environ.get('PG_DB') is None:
-            environ['PG_DB'] = self.pg['pg_db']
-
     # Returns the listener url based on the region input
     def getListenerUrl(self) -> str:
         if self.otel['custom_listener'] != "":

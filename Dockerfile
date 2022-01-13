@@ -12,7 +12,6 @@ RUN pip3 install -r requirements.txt --user && \
 # Copy files
 COPY config_files config_files
 COPY queries queries
-COPY cw_namespaces cw_namespaces
 COPY testdata testdata
 COPY builder.py builder.py
 COPY config.py config.py

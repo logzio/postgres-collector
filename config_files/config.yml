@@ -6,33 +6,17 @@ otel:
   # environment tag that will be attached to all samples
   p8s_logzio_name: "postgres-observability"
   # your logz.io metrics token
-  token: ""
+  token: token
   # the time to wait between scrape requests
-  scrape_interval: 300
-  # the time to wait before throttling remote write post request to logz.io
   remote_timeout: 120
-  # the time to wait before throttling a scrape request to cloudwatch exporter
-  scrape_timeout: 120
   # opentelemetry log level
   log_level: "debug"
   # python script log level
   logzio_log_level: "debug"
-  # aws credentials
 pg:
-  # pg database host
-  pg_host:
-  # pg database port
-  pg_port: 5432
-  # pg database name
-  pg_db: postgres
-  # pg database username
-  pg_user: postgres
-  # pg database password
-  pg_password:
   # pg scrape interval
   pg_scrape_interval: 60
   # pg scrape timeout
-  pg_scrape_timeout: 60
-
-
-
+  pg_scrape_timeout: 120
+  # list of instances to monitor
+  instances: []
