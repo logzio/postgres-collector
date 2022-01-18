@@ -8,9 +8,6 @@ pg_stat_statements:
     - datname:
         usage: "LABEL"
         description: "Name of database"
-    - queryid:
-        usage: "LABEL"
-        description: "Query ID"
     - query:
         usage: "LABEL"
         description: "Query statement"
