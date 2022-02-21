@@ -60,6 +60,23 @@ class TestBuilder(unittest.TestCase):
         self.assertEqual(test_config.otel['log_level'], 'info')
         self.assertEqual(test_config.otel['logzio_log_level'], 'debug')
 
+    def test_load_config_instances_list(self):
+        # otel
+        os.environ['PG_INSTANCES'] = '{"pg_host": "database-1", "pg_port": 5432, "pg_db": "postgres", "pg_user": ' \
+                                     '"postgres", "pg_password": "pass", "pg_labels": [{"alias": "rds-1"},' \
+                                     '{"test": "test"}]};{"pg_host": "database-2", "pg_port": 5432, ' \
+                                     '"pg_db": "postgres", "pg_user": "postgres", "pg_password": "pass", "pg_labels": ' \
+                                     '[{"alias": "rds-1"},{"test": "test"}]} '
+        test_config = Config('./testdata/test-config.yml')
+        os.environ.clear()
+        test_config_2 = Config('./testdata/test-config.yml')
+        # Success
+        self.assertEqual(test_config.pg['instances'], test_config_2.pg['instances'])
+        try:
+            Config('./testdata/test-config.yml')
+        except Exception as e:
+            self.fail(f'Unexpected error {e}')
+
 
 class TestInput(unittest.TestCase):
     def test_is_valid_logzio_token(self):
@@ -114,7 +131,6 @@ class TestInput(unittest.TestCase):
             iv.is_valid_interval(60)
         except (TypeError, ValueError) as e:
             self.fail(f'Unexpected error {e}')
-
 
     def test_is_valid_p8s_logzio_name(self):
         # Fail Type

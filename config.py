@@ -37,15 +37,15 @@ class Config:
         if environ.get('PG_INSTANCES') is not None:
             try:
                 instances = []
-                instancesRaw = environ.get('PG_INSTANCES').split(',')
+                instancesRaw = environ.get('PG_INSTANCES').split(';')
                 for instance in instancesRaw:
-                    json.loads(instance)
+                    instance = json.loads(instance)
                     validatedInstance = self.validatePgInstance(instance)
                     if validatedInstance is not None:
                         instances.append(validatedInstance)
             except Exception as e:
                 raise Exception(f"Failed to parse PG_INSTANCES string: {e}")
-            self.pg['pg_scrape_interval'] = instances
+            self.pg['instances'] = instances
 
     # Returns the listener url based on the region input
     def getListenerUrl(self) -> str:
@@ -71,6 +71,7 @@ class Config:
                 raise ValueError('pg_user must be set')
             if instance['pg_password'] is None:
                 raise ValueError('pg_password must be set')
+            return instance
         except Exception as e:
             self.logger.warning(f'Failed to parse, dropping instance: {json.dumps(instance)}\n Error message: {e}')
             return None
@@ -80,7 +81,7 @@ class Config:
         DEFAULT_LOG_LEVEL = "INFO"
         LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         try:
-            user_level = self.config.otel['logzio_log_level'].upper()
+            user_level = "WARNING"
             level = user_level if user_level in LOG_LEVELS else DEFAULT_LOG_LEVEL
         except KeyError:
             level = DEFAULT_LOG_LEVEL
