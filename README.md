@@ -1,4 +1,4 @@
-# Postgres rds collector
+# Postgres collector
 Collects database metrics using postgres exporter and forward the data to logz.io, based on opentelemetry collector
 
 #### Before you begin
@@ -90,7 +90,7 @@ Mount the configuration file to your container:
 ```shell
 docker run --rm --name logzio/postgres-rds-collector \
 -v <<path_to_config_file>>:/config_files/config.yml \
-logzio/mobileye-rds-collector
+logzio/postgres-collector
 ```
 
 ### Run with custom queries for postgres exporter:
@@ -111,7 +111,7 @@ this file will generate a metric called `pg_postmaster_start_time_seconds`. for 
 docker run --name logzio/postgres-rds-collector \
 -v <<path_to_config_file>>:/config_files/config.yml \
 -v <<path_to_custom_queries_file>>:/queries/custom-queries.yml \
-logzio/mobileye-rds-collector
+logzio/postgres-collector
 ```
 ### Publish ports
 You can monitor the container using opentelemetry extensions in the following ports:
@@ -128,5 +128,5 @@ docker run --rm --name logzio/postgres-rds-collector \
 -p 55679:55679 \
 -p 13133:13133 \
 -p 1777:1777 \
-logzio/mobileye-rds-collector
+logzio/postgres-collector
 ```
