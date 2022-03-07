@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.14-debian-1
+FROM debian:stable-slim
 
 # Use root account to use apt
 USER root
@@ -9,49 +9,24 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt --user && \
     rm -f requirements.txt
 
-# below RUN includes plugin as examples elasticsearch is not required
-# you may customize including plugins as you wish
-RUN buildDeps="sudo make gcc g++ libc-dev" \
- && apt-get clean \
- && apt-get install libpq-dev -y \
- && apt-get install -y --no-install-recommends $buildDeps \
- && sudo gem install fluent-plugin-logzio \
- && sudo gem install fluent-plugin-prometheus \
- && sudo gem install pg \
- && sudo gem install fluent-plugin-sql \
- && sudo gem install fluent-plugin-record-modifier \
- && sudo gem sources --clear-all \
- && SUDO_FORCE_REMOVE=yes \
-    apt-get purge -y --auto-remove \
-                  -o APT::AutoRemove::RecommendsImportant=false \
-                  $buildDeps \
- && rm -rf /var/lib/apt/lists/* \
- && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
-
-COPY config_files/fluent.conf /fluentd/etc/
-RUN mkdir /var/run/fluentd
-RUN touch /var/run/fluentd/sql_state
-
-# Install JAVA
-RUN apt-get update && \
-apt-get install -y --no-install-recommends \
-        openjdk-11-jre
-
-# Prints installed java version, just for checking
-RUN java --version
 # Copy files
 COPY config_files config_files
 COPY queries queries
-COPY cw_namespaces cw_namespaces
 COPY testdata testdata
 COPY builder.py builder.py
 COPY config.py config.py
 COPY input_validator.py input_validator.py
-COPY cloudwatch_exporter-0.11.0-jar-with-dependencies.jar cloudwatch_exporter-0.11.0-jar-with-dependencies.jar
 
 # Download opentelemetry binary
-COPY otelcontribcol_linux_amd64 otelcontribcol_linux_amd64
-COPY postgres_exporter postgres_exporter
+RUN curl -L https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.45.0/otelcol-contrib_0.45.0_linux_amd64.tar.gz -o otelcol-contrib.tar.gz
+RUN tar -xf otelcol-contrib.tar.gz otelcol-contrib
+RUN mv otelcol-contrib otelcontribcol_linux_amd64
+
+# Download postgres_exporter binary
+RUN curl -L https://github.com/percona/postgres_exporter/releases/download/v0.4.7/postgres_exporter_linux_amd64.tar.gz -o postgres_exporter.tar.gz
+RUN tar -xf postgres_exporter.tar.gz
+
+# Binary permmisions
 RUN chmod +x otelcontribcol_linux_amd64
 RUN chmod +x postgres_exporter
 # Opentelemetry metrics
@@ -64,5 +39,8 @@ EXPOSE 13133
 EXPOSE 1777
 
 EXPOSE 5001
+
+EXPOSE 9187
+
 
 CMD ["python3", "builder.py"]

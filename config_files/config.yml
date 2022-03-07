@@ -6,77 +6,17 @@ otel:
   # environment tag that will be attached to all samples
   p8s_logzio_name: "postgres-observability"
   # your logz.io metrics token
-  token: ""
+  token: token
   # the time to wait between scrape requests
-  scrape_interval: 300
-  # the time to wait before throttling remote write post request to logz.io
   remote_timeout: 120
-  # the time to wait before throttling a scrape request to cloudwatch exporter
-  scrape_timeout: 120
   # opentelemetry log level
   log_level: "debug"
   # python script log level
   logzio_log_level: "debug"
-  # aws credentials
-  AWS_ACCESS_KEY_ID: ""
-  AWS_SECRET_ACCESS_KEY: ""
-cloudwatch:
-  # set to true if you are loading a custom configuration file for cloudwatch exporter
-  custom_config: "false"
-  # your cloudwatch aws region
-  region: "us-east-1"
-  # role arn to assume
-  role_arn: ""
-
-  rds_instances: ["a","b"]
-  # The newest data to request. Used to avoid collecting data that has not fully converged
-  delay_seconds: 300
-  # how far back to request data for. Useful for cases such as Billing metrics that are only set every few hours
-  range_seconds: 300
-  # period to request the metric for. Only the most recent data point is used
-  period_seconds: 300
-  # boolean for whether to set the Prometheus metric timestamp as the original Cloudwatch timestamp
-  set_timestamp: "false"
 pg:
-  # pg database host
-  pg_host:
-  # pg database port
-  pg_port: 5432
-  # pg database name
-  pg_db: postgres
-  # pg database username
-  pg_user: postgres
-  # pg database password
-  pg_password:
   # pg scrape interval
   pg_scrape_interval: 60
   # pg scrape timeout
-  pg_scrape_timeout: 60
-fluentd:
-  logzio_log_listener: "https://listener.logz.io:8071"
-
-  logzio_log_token: ""
-
-  logzio_type: "postgres-observability"
-
-  buffer_type: "file"
-
-  buffer_path: "/var/log/fluentd-buffers/stackdriver.buffer"
-
-  overflow_action: "block"
-
-  chunk_limit_size: "2M"
-
-  queue_limit_length: "6"
-
-  flush_interval: "5s"
-
-  retry_max_interval: "30"
-
-  retry_forever: "true"
-
-  flush_thread_count: "2"
-
-  slow_flush_log_threshold: "20.0"
-
-
+  pg_scrape_timeout: 120
+  # list of instances to monitor
+  instances: []

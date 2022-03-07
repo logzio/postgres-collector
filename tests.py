@@ -1,12 +1,7 @@
 import os
 import unittest
-
-import yaml
-
-from builder import Builder
 from config import Config
 import input_validator as iv
-from testdata.data import aws_namespaces as ns_list
 
 
 class TestBuilder(unittest.TestCase):
@@ -38,17 +33,6 @@ class TestBuilder(unittest.TestCase):
         self.assertEqual(test_config.otel['remote_timeout'], 120)
         self.assertEqual(test_config.otel['log_level'], 'debug')
         self.assertEqual(test_config.otel['logzio_log_level'], 'info')
-        self.assertEqual(test_config.otel['AWS_ACCESS_KEY_ID'], 'fakeXamgZErKKkMhmzdVZDhuZcpGKXeo')
-        self.assertEqual(test_config.otel['AWS_SECRET_ACCESS_KEY'], 'fakeXamgZErKKkMhmzdVZDhuZcpGKXeo')
-        # cloudwatch
-        self.assertEqual(test_config.cloudwatch['custom_config'], 'false')
-        self.assertEqual(test_config.cloudwatch['region'], 'us-east-1')
-        self.assertEqual(test_config.cloudwatch['role_arn'], '')
-        self.assertEqual(test_config.cloudwatch['aws_namespaces'], ["AWS/Lambda", "AWS/EC2"])
-        self.assertEqual(test_config.cloudwatch['set_timestamp'], 'false')
-        self.assertEqual(test_config.cloudwatch['delay_seconds'], 600)
-        self.assertEqual(test_config.cloudwatch['range_seconds'], 600)
-        self.assertEqual(test_config.cloudwatch['period_seconds'], 300)
         # Success
         try:
             Config('./testdata/test-config.yml')
@@ -58,7 +42,6 @@ class TestBuilder(unittest.TestCase):
     def test_load_config_env_overwrite(self):
         # otel
         os.environ['LOGZIO_REGION'] = 'eu'
-        os.environ['SCRAPE_INTERVAL'] = '600'
         os.environ['P8S_LOGZIO_NAME'] = 'test'
         os.environ['TOKEN'] = 'test'
         os.environ['CUSTOM_LISTENER'] = 'test'
@@ -67,77 +50,30 @@ class TestBuilder(unittest.TestCase):
         os.environ['LOGZIO_LOG_LEVEL'] = 'debug'
         os.environ['AWS_ACCESS_KEY_ID'] = 'test'
         os.environ['AWS_SECRET_ACCESS_KEY'] = 'test'
-        # cloudwatch
-        os.environ['DELAY_SECONDS'] = '60'
-        os.environ['RANGE_SECONDS'] = '60'
-        os.environ['PERIOD_SECONDS'] = '60'
-        os.environ['SET_TIMESTAMP'] = 'true'
-        os.environ['AWS_REGION'] = 'us-east-2'
-        os.environ['AWS_NAMESPACES'] = 'AWS/RDS,AWS/ELB'
-        os.environ['CUSTOM_CONFIG'] = 'true'
-        os.environ['AWS_ROLE_ARN'] = 'test'
         test_config = Config('./testdata/test-config.yml')
         os.environ.clear()
         # otel
         self.assertEqual(test_config.otel['logzio_region'], 'eu')
-        self.assertEqual(test_config.otel['scrape_interval'], 600)
         self.assertEqual(test_config.otel['token'], 'test')
         self.assertEqual(test_config.otel['custom_listener'], 'test')
         self.assertEqual(test_config.otel['remote_timeout'], 600)
         self.assertEqual(test_config.otel['log_level'], 'info')
         self.assertEqual(test_config.otel['logzio_log_level'], 'debug')
-        self.assertEqual(test_config.otel['AWS_ACCESS_KEY_ID'], 'test')
-        self.assertEqual(test_config.otel['AWS_SECRET_ACCESS_KEY'], 'test')
-        # cloudwatch
-        self.assertEqual(test_config.cloudwatch['custom_config'], 'true')
-        self.assertEqual(test_config.cloudwatch['region'], 'us-east-2')
-        self.assertEqual(test_config.cloudwatch['role_arn'], 'test')
-        self.assertEqual(test_config.cloudwatch['aws_namespaces'], 'AWS/RDS,AWS/ELB')
-        self.assertEqual(test_config.cloudwatch['delay_seconds'], 60)
-        self.assertEqual(test_config.cloudwatch['range_seconds'], 60)
-        self.assertEqual(test_config.cloudwatch['period_seconds'], 60)
-        self.assertEqual(test_config.cloudwatch['set_timestamp'], 'true')
 
-    def test_add_all_cloudwatch_namespaces(self):
+    def test_load_config_instances_list(self):
+        # otel
+        os.environ['PG_INSTANCES'] = '{"pg_host": "database-1", "pg_port": 5432, "pg_db": "postgres", "pg_user": ' \
+                                     '"postgres", "pg_password": "pass", "pg_labels": [{"alias": "rds-1"},' \
+                                     '{"test": "test"}]};{"pg_host": "database-2", "pg_port": 5432, ' \
+                                     '"pg_db": "postgres", "pg_user": "postgres", "pg_password": "pass", "pg_labels": ' \
+                                     '[{"alias": "rds-1"},{"test": "test"}]} '
+        test_config = Config('./testdata/test-config.yml')
+        os.environ.clear()
+        test_config_2 = Config('./testdata/test-config.yml')
+        # Success
+        self.assertEqual(test_config.pg['instances'], test_config_2.pg['instances'])
         try:
-            builder = Builder('./testdata/test-config.yml', cloudwatchConfigPath='./testdata/cloudwatch-test.yml')
-            builder.config.cloudwatch['aws_namespaces'] = ns_list
-            builder.updateCloudwatchConfiguration('./cw_namespaces/')
-            with open(builder.cloudwatchConfigPath, 'r+') as cw:
-                builder.dumpAndCloseFile({'metrics': []}, cw)
-        except Exception as e:
-            self.fail(f'Unexpected error {e}')
-
-    def test_cloudwatch_config(self):
-        try:
-            builder = Builder('./testdata/test-config.yml', cloudwatchConfigPath='./testdata/cloudwatch-test.yml')
-            builder.config.cloudwatch['aws_namespaces'], remove = iv.is_valid_aws_namespaces('AWS/EC2,AWS/RDS')
-            builder.updateCloudwatchConfiguration('./cw_namespaces/')
-            with open(builder.cloudwatchConfigPath, 'r+') as cw:
-                builder.dumpAndCloseFile({'metrics': []}, cw)
-        except Exception as e:
-            self.fail(f'Unexpected error {e}')
-
-    def test_update_otel_collector(self):
-        try:
-            builder = Builder('./testdata/test-config.yml', otelConfigPath='./testdata/otel-test.yml')
-            with open(builder.otelConfigPath, 'r+') as otel:
-                builder.updateOtelConfiguration()
-                values = yaml.safe_load(otel)
-                self.assertEqual(values['receivers']['prometheus_exec']['scrape_interval'], '300s')
-                self.assertEqual(values['receivers']['prometheus_exec']['scrape_timeout'], '300s')
-                self.assertEqual(values['exporters']['prometheusremotewrite']['endpoint'],
-                                 'https://listener.logz.io:8053')
-                self.assertEqual(values['exporters']['prometheusremotewrite']['timeout'], '120s')
-                self.assertEqual(values['exporters']['prometheusremotewrite']['external_labels']['p8s_logzio_name'],
-                                 'cloudwatch-metrics')
-                self.assertEqual(values['exporters']['prometheusremotewrite']['headers']['Authorization'],
-                                 'Bearer fakeXamgZErKKkMhmzdVZDhuZcpGKXeo')
-                self.assertEqual(values['service']['telemetry']['logs']['level'], 'debug')
-                # reset config
-                with open('testdata/default-otel.yml', 'r+') as otel_def:
-                    testing_otel_yaml = yaml.safe_load(otel_def)
-                    builder.dumpAndCloseFile(testing_otel_yaml, otel)
+            Config('./testdata/test-config.yml')
         except Exception as e:
             self.fail(f'Unexpected error {e}')
 
@@ -195,20 +131,6 @@ class TestInput(unittest.TestCase):
             iv.is_valid_interval(60)
         except (TypeError, ValueError) as e:
             self.fail(f'Unexpected error {e}')
-
-    def test_is_valid_aws_namespaces(self):
-        # Fail Value
-        self.assertRaises(ValueError, iv.is_valid_aws_namespaces, '')
-        self.assertRaises(ValueError, iv.is_valid_aws_namespaces, 'AWS/ec2,  aws/RDS, AWS/lambda, AWS/fdfdf')
-        # Success
-        self.assertTupleEqual(iv.is_valid_aws_namespaces('AWS/RDS,AWS/Lambda,AWS/CloudFront'),
-                              (['AWS/CloudFront', 'AWS/Lambda', 'AWS/RDS'], []))
-        self.assertTupleEqual(iv.is_valid_aws_namespaces('AWS/RDS,AWS/nosuch,AWS/Lambda,AWS/CloudFront'),
-                              (['AWS/CloudFront', 'AWS/Lambda', 'AWS/RDS'], ['AWS/nosuch']))
-        self.assertTupleEqual(iv.is_valid_aws_namespaces('AWS/RDS,AWS/Lambda,AWS/Cloudfront'),
-                              (['AWS/Lambda', 'AWS/RDS'], ['AWS/Cloudfront']))
-        self.assertTupleEqual(iv.is_valid_aws_namespaces('AWS/RDS, AWS/RDS,  AWS/Lambda,AWS/Lambda,AWS/Cloudfront'),
-                              (['AWS/Lambda', 'AWS/RDS'], ['AWS/Cloudfront']))
 
     def test_is_valid_p8s_logzio_name(self):
         # Fail Type

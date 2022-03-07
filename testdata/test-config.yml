@@ -8,14 +8,26 @@ otel:
   remote_timeout: 120
   log_level: "debug"
   logzio_log_level: "info"
-  AWS_ACCESS_KEY_ID: "fakeXamgZErKKkMhmzdVZDhuZcpGKXeo"
-  AWS_SECRET_ACCESS_KEY: "fakeXamgZErKKkMhmzdVZDhuZcpGKXeo"
-cloudwatch:
-  custom_config: "false"
-  region: "us-east-1"
-  role_arn: ""
-  aws_namespaces: ["AWS/Lambda","AWS/EC2"]
-  delay_seconds: 600
-  range_seconds: 600
-  period_seconds: 300
-  set_timestamp: "false"
+pg:
+  # pg scrape interval
+  pg_scrape_interval: 60
+  # pg scrape timeout
+  pg_scrape_timeout: 120
+  # list of instances to monitor
+  instances:
+    - pg_host: database-1
+      pg_port: 5432
+      pg_db: postgres
+      pg_user: postgres
+      pg_password: pass
+      pg_labels:
+        - alias: rds-1
+        - test: test
+    - pg_host: database-2
+      pg_port: 5432
+      pg_db: postgres
+      pg_user: postgres
+      pg_password: pass
+      pg_labels:
+        - alias: rds-1
+        - test: test

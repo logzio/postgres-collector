@@ -13,28 +13,7 @@ extensions:
   pprof: null
   zpages: null
 processors: null
-receivers:
-  prometheus_exec:
-    env: []
-    exec: java -jar cloudwatch_exporter-0.11.0-jar-with-dependencies.jar 9106 config_files/cloudwatch.yml
-    port: 9106
-    scrape_interval: 300s
-    scrape_timeout: 120s
-  prometheus_exec/postgres:
-    exec: ./postgres_exporter
-    scrape_interval: 60s
-    port: 9187
-    env:
-      - name: DATA_SOURCE_NAME
-        value:
-      - name: PG_EXPORTER_EXTEND_QUERY_MR_PATH
-        value: "queries/"
-      - name: PG_EXPORTER_EXTEND_QUERY_MR
-        value: "true"
-  prometheus_exec/fluentd:
-    exec: fluentd -c /config_files/fluent.conf
-    scrape_interval: 60s
-    port: 5001
+receivers: {}
 
 service:
   extensions:
@@ -47,10 +26,7 @@ service:
       - logging
       - prometheusremotewrite
       processors: []
-      receivers:
-      - prometheus_exec
-      - prometheus_exec/postgres
-      - prometheus_exec/fluentd
+      receivers: []
   telemetry:
     logs:
       level: debug
