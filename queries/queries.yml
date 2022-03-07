@@ -29,3 +29,5 @@ pg_stat_statements:
     - stddev_time_seconds:
         usage: "GAUGE"
         description: "Population standard deviation of time spent in the statement, in milliseconds"
+
+
